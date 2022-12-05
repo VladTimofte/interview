@@ -1,6 +1,7 @@
 import {  Modal, Form, Input } from 'antd';
+import { useEffect } from 'react'
 
-const ModalCreateCar = ({save, form, hide, showAddCarsModal}) => {
+const ModalCreateCar = ({save, form, hide, record}) => {
 
   const calculateTaxShelterbyCC = val => {
     if (!val) return 0
@@ -8,6 +9,17 @@ const ModalCreateCar = ({save, form, hide, showAddCarsModal}) => {
     if (val > 1500 && val < 2000) return 100
     if (val >= 2000) return 200
   }
+
+  useEffect(() => {
+	if (!record || !form) return
+	form.setFieldsValue({
+		make: record?.make,
+		model: record?.model,
+		manufacturingYear: record?.manufacturingYear,
+		cilindricalCapacity: record?.cilindricalCapacity,
+		taxShelter: record?.taxShelter,
+	})
+}, [form, record])
 
   const handleTaxShelter = e => {
     const val = Number(e)
@@ -20,7 +32,7 @@ const ModalCreateCar = ({save, form, hide, showAddCarsModal}) => {
 
   return (
     <Modal title="Add Car" 
-    open={showAddCarsModal}
+    open={record}
     onOk={() => {
       form.validateFields().then(save)
     }} 

@@ -1,4 +1,5 @@
 import useSWR from 'swr'
+import uniqid from 'uniqid';
 import {useEffect} from 'react'
 
 import { getItemLC, setItemLC } from '../utils/ls'
@@ -30,6 +31,11 @@ const usePersons = id => {
             tempData.splice(indexOfExistedObj, 1, record);
            await setItemLC(KEY, tempData)
 		   await mutate(tempData)
+        } else {
+            const tempData = {...record, id: uniqid()}
+            const dataToBeSaved = [...data, tempData]
+            await setItemLC(KEY, dataToBeSaved)
+		   await mutate(dataToBeSaved)
         }
     }
 

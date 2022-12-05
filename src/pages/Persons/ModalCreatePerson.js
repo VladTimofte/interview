@@ -1,15 +1,22 @@
+import { useMemo } from 'react'
 import {  Modal, Form, Input, Select } from 'antd';
 import { CNP } from 'romanian-personal-identity-code-validator';
 
 import useCars from '../../data/useCars'
 import { getAge } from '../../utils/numbers';
 
-const ModalCreatePerson = ({save, form, hide, showAddPersonModal}) => {
+const ModalCreatePerson = ({save, form, hide, record}) => {
     const { data: cars } = useCars()
+
+	const parsedCarsOptions = useMemo(() => {
+		return cars?.map(el => {
+		  return { label: `${el?.make} ${el?.model}`, value: el?.id }
+		})
+	  },[cars])
 
     const handleCNPInput = async e => {
       const val = Number(e)
-      if (val < 13 || !val) return
+      if (val?.toString()?.length < 13 || !val) return
       let codNumericPersonal = await new CNP(e)
       const yearsOld = getAge(codNumericPersonal.getBirthDate())
       form.setFieldsValue({
@@ -19,7 +26,7 @@ const ModalCreatePerson = ({save, form, hide, showAddPersonModal}) => {
 
   return (
     <Modal title="Add Person" 
-    open={showAddPersonModal}
+    open={record}
     onOk={() => {
       form.validateFields().then(save)
     }} 
@@ -90,7 +97,7 @@ const ModalCreatePerson = ({save, form, hide, showAddPersonModal}) => {
               ]}
             >
 						<Select
-							options={cars}
+							options={parsedCarsOptions}
 							mode='multiple'
 						/>
             </Form.Item>

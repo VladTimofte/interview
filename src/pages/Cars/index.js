@@ -1,6 +1,6 @@
 import { Button, Table, Form, Input, Popconfirm } from "antd";
 import { useEffect, useState, useMemo } from "react";
-import { CheckOutlined, CloseOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { LoadingOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import uniqid from 'uniqid';
 
 import useCars from '../../data/useCars'
@@ -13,7 +13,6 @@ function Cars() {
   const { data, update, remove } = useCars()
   const [dataSource, setDataSource] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
-  const [showAddCarsModal, setShowAddCarsModal] = useState(false)
   const [searchValue, setSearchValue] = useState()
   const [form] = Form.useForm();
 
@@ -23,197 +22,54 @@ function Cars() {
   }, [data]);
 
   const handleEdit = rec => {
-    setEditingRow(rec?.key);
-    form.setFieldsValue({
-      currentNumber: rec?.currentNumber,
-      make: rec?.make,
-      model: rec?.model,
-      manufacturingYear: rec?.manufacturingYear,
-      cilindricalCapacity: rec?.cilindricalCapacity,
-      taxShelter: rec?.taxShelter,
-    });
+    setEditingRow(rec);
   }
 
-  const handleSave = record => {
-    const fields = form.getFieldsValue()
-    const dataToBeSaved = {...fields, id: record?.id, key: record?.key}
-    update(dataToBeSaved).then(() => setEditingRow(null))
-  }
-
-  const handleCreateCar = record => {
-    const fields = form.getFieldsValue()
-    const dataToBeSaved = {...fields, id: record.id, key: uniqid(), currentNumber: randomNumber(10000000, 99999999)}
-    update(dataToBeSaved).then(() => setShowAddCarsModal(false))
+  const saveData = record => {
+	form.validateFields().then(() => {
+		const fields = form.getFieldsValue()
+		const dataToBeSaved = {...fields, id: editingRow?.id, key: record?.key || uniqid(), currentNumber: record?.currentNumber || randomNumber(10000000, 99999999)}
+		debugger
+		update(dataToBeSaved).then(() => setEditingRow(null))
+	})
   }
 
   const handleClickAddCar = () => {
     form.resetFields()
-    setShowAddCarsModal(true)
-  }
-
-  const calculateTaxShelterbyCC = val => {
-    if (!val) return 0
-    if (val <= 1500) return 50
-    if (val > 1500 && val < 2000) return 100
-    if (val >= 2000) return 200
-  }
-
-  const handleTaxShelter = e => {
-    const val = Number(e)
-    if (val < 4 || !val) return
-    form.setFieldsValue({
-      taxShelter: calculateTaxShelterbyCC(val)
-    })
-    
+    setEditingRow({})
   }
 
   const columns = [
     {
       title: "Current Number",
       dataIndex: "currentNumber",
-      render: (text, record) => {
-        if (editingRow === record.key) {
-          return (
-            <Form.Item
-              name="currentNumber"
-            >
-              <Input disabled />
-            </Form.Item>
-          );
-        } else {
-          return <p>{text}</p>;
-        }
-      },
     },
     {
       title: "Make",
       dataIndex: "make",
-      render: (text, record) => {
-        if (editingRow === record.key) {
-          return (
-            <Form.Item
-              name="make"
-              rules={[
-                {
-                  required: true,
-                  message: "Please enter make",
-                },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          );
-        } else {
-          return <p>{text}</p>;
-        }
-      },
     },
     {
       title: "Modal",
       dataIndex: "model",
-      render: (text, record) => {
-        if (editingRow === record.key) {
-          return (
-            <Form.Item
-              name="model"
-              rules={[
-                {
-                  required: true,
-                  message: "Please enter model",
-                },
-              ]}
-            >
-              <Input />
-            </Form.Item>
-          );
-        } else {
-          return <p>{text}</p>;
-        }
-      },
     },
     {
       title: "Manufacturing year",
       dataIndex: "manufacturingYear",
-      render: (text, record) => {
-        if (editingRow === record.key) {
-          return (
-            <Form.Item
-              name="manufacturingYear"
-              rules={[
-                {
-                  required: true,
-                  max: 4,
-                },
-              ]}
-            >
-              <Input type="number" />
-            </Form.Item>
-          );
-        } else {
-          return <p>{text}</p>;
-        }
-      },
     },
     {
       title: "Cilindrical Capacity",
       dataIndex: "cilindricalCapacity",
-      render: (text, record) => {
-        if (editingRow === record.key) {
-          return (
-            <Form.Item
-              name="cilindricalCapacity"
-              onChange={e => handleTaxShelter(e?.target?.value)}
-              rules={[
-                {
-                  required: true,
-                  max: 4,
-                },
-              ]}
-            >
-              <Input type="number" />
-            </Form.Item>
-          );
-        } else {
-          return <p>{text}</p>;
-        }
-      },
     },
     {
       title: "Tax Shelter",
       dataIndex: "taxShelter",
-      render: (text, record) => {
-        if (editingRow === record.key) {
-          return (
-            <Form.Item
-              name="taxShelter"
-              rules={[
-                {
-                  required: true,
-                  max: 4,
-                },
-              ]}
-            >
-              <Input type="number" disabled />
-            </Form.Item>
-          );
-        } else {
-          return <p>{text}</p>;
-        }
-      },
     },
     {
       render: (_, record) => {
         return (
           <>
-            {editingRow === record.key ? (
-              <>
-              <CheckOutlined
-               onClick={() => handleSave(record)} />
-              <CloseOutlined
-              onClick={() => {
-                setEditingRow(null);
-              }} />
-              </>
+            {editingRow?.key === record?.key ? (
+              <LoadingOutlined />
             ) : (
               <>
               <EditOutlined
@@ -272,10 +128,10 @@ function Cars() {
           <Table columns={columns} dataSource={filteredData}></Table>
         </Form>
         <ModalCreateCar 
-        save={handleCreateCar}
+        save={saveData}
         form={form}
-        showAddCarsModal={showAddCarsModal}
-        hide={() => setShowAddCarsModal(false)} />
+        record={editingRow}
+        hide={() => setEditingRow(null)} />
       </header>
     </div>
   );
