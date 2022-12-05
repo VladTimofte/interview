@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
+
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Lato', sans-serif;
+}
+
+.credits,
+.persons,
+.cars {
+  background: gray;
+  padding: 20px;
+  height: 93vh;
+}
+
+.row {
+    display: grid;
+		grid-auto-flow: column;
+		grid-gap: 1em;
+		align-items: center;
+		grid-auto-columns: minmax(0, 1fr);
+}
+
+.row-justify-items-start {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 1em;
+  align-items: center;
+  grid-auto-columns: minmax(0, 1fr);
+  justify-items: start;
+}
+
+.row-justify-items-center {
+  display: grid;
+  grid-auto-flow: column;
+  grid-gap: 1em;
+  align-items: center;
+  grid-auto-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+
+.action-buttons {
+  padding: 20px;
+  padding-left: 0;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
